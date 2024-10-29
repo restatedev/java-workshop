@@ -171,7 +171,7 @@ Do we still need sagas if we have Durable Execution?
 Not necessarily, meaning that Restate will always try to drive the execution forward, to completion.
 
 But there might be some cases in which your business logic demands to end processing and revert operations.
-In this case, you can let your code throw a `TerminalException`, catch it, and do compensations.
+In this case, you can let your code throw an exception, catch it, do compensations, and throw a `TerminalException`.
 A `TerminalException` is the only type of exception that will not be retried by Restate.
 
 Let's implement a saga for the checkout process. 
