@@ -10,7 +10,6 @@ Pre-requisites:
 ## Why do we need Restate?
 
 ## How does Restate work?
-[Durable Execution Concept](https://docs.restate.dev/concepts/durable_execution)
 
 ## Running your first application
 [Quickstart](https://docs.restate.dev/get_started/quickstart?sdk=java)
@@ -20,10 +19,8 @@ Follow the [quickstart](https://docs.restate.dev/get_started/quickstart?sdk=java
 A Restate application consists of services that communicate via handlers, and are annotated with `@Service`.
 Each handler is a service method annotated with `@Handler` and takes a `RestateContext` as its first argument.
 
-Restate in front of your services like a reverse proxy or message broker.
+Restate sits in front of your services like a reverse proxy or message broker.
 Restate receives incoming requests and routes them to the appropriate handlers.
-
-// ADD IMAGE
 
 In this example, we will implement an e-commerce checkout process. 
 We have a `CheckoutService` with a `checkout` method that reserves the ticket for the user and handles the payment.
@@ -36,6 +33,7 @@ Run the application again and invoke the checkout method.
 ```shell
 curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json' -d '"Rolling_Stones_31122024"'
 ```
+
 ## Persisting results
 [SDK Docs](https://docs.restate.dev/develop/java/journaling-results)
 
@@ -83,10 +81,11 @@ restate sql "query"
 
 Restate also exports OTEL traces to for example Jaeger. Learn more in the [monitoring docs](https://docs.restate.dev/operate/monitoring/tracing). 
 
-## Awakeables / Durable Futures
+## Awakeables 
 [SDK Docs](https://docs.restate.dev/develop/java/awakeables)
 
-An awakeable is similar to Java Futures but then durably stored in Restate, and managed by Restate.
+Awakeables pause an invocation while waiting for another process to complete a task. You can use this pattern to let a handler execute a task somewhere else and retrieve the result. 
+This pattern is also known as the callback (task token) pattern.
 When the process crashes while waiting for an awakeable, Restate will resume the process and recover the awakeable.
 
 You can resolve an awakeable via its ID, either via HTTP or with SDK from within another service.
