@@ -13,10 +13,4 @@ public class TicketService {
         System.out.println("Reserving ticket: " + ticket);
         return true;
     }
-
-    public static void main(String[] args) {
-        RestateHttpEndpointBuilder.builder()
-                .bind(new TicketService())
-                .buildAndListen(9081);
-    }
 }

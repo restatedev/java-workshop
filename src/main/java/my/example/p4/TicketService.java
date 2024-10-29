@@ -43,10 +43,4 @@ public class TicketService {
         }
         ctx.set(STATUS, "Sold");
     }
-
-    public static void main(String[] args) {
-        RestateHttpEndpointBuilder.builder()
-                .bind(new TicketService())
-                .buildAndListen(9081);
-    }
 }

@@ -30,10 +30,10 @@ public class CheckoutService {
       }
 
       String paymentId = ctx.random().nextUUID().toString();
-      var durableFuture = ctx.awakeable(JsonSerdes.BOOLEAN);
+      var awakeable = ctx.awakeable(JsonSerdes.BOOLEAN);
       compensations.add(() -> abortPayment(paymentId));
-      ctx.run("payment", () -> payAsync(paymentId, 40, durableFuture.id()));
-      boolean paid = durableFuture.await(Duration.ofMinutes(10));
+      ctx.run("payment", () -> payAsync(paymentId, 40, awakeable.id()));
+      boolean paid = awakeable.await(Duration.ofMinutes(10));
 
       if(paid) {
         compensations.add(() -> TicketServiceClient.fromContext(ctx, ticket).unreserve().await());
@@ -57,11 +57,5 @@ public class CheckoutService {
   private void abortPayment(String paymentId){
     // call payment provider
     logger.info("Aborting the payment for id " + paymentId);
-  }
-
-  public static void main(String[] args) {
-    RestateHttpEndpointBuilder.builder()
-            .bind(new CheckoutService())
-            .buildAndListen();
   }
 }

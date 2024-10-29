@@ -24,9 +24,9 @@ public class CheckoutService {
 
     String paymentId = ctx.random().nextUUID().toString();
 
-    var durableFuture = ctx.awakeable(JsonSerdes.BOOLEAN);
-    ctx.run("payment", () -> payAsync(paymentId, 40, durableFuture.id()));
-    boolean paid = durableFuture.await();
+    var awakeable = ctx.awakeable(JsonSerdes.BOOLEAN);
+    ctx.run("payment", () -> payAsync(paymentId, 40, awakeable.id()));
+    boolean paid = awakeable.await();
 
     if(paid) {
         TicketServiceClient.fromContext(ctx, ticket).send().markAsSold();
@@ -39,11 +39,5 @@ public class CheckoutService {
     logger.info("Doing the payment for id " + paymentId +
             ", amount " + amount +
             " and durableFutureId " + durableFutureId);
-  }
-
-  public static void main(String[] args) {
-    RestateHttpEndpointBuilder.builder()
-            .bind(new CheckoutService())
-            .buildAndListen();
   }
 }
