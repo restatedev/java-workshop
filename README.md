@@ -23,9 +23,9 @@ Content:
 7. Awakeables
 8. Service communication
 9. Virtual Objects & State
-10. Timers & scheduling
-11. Sagas
-12. Idempotency
+10. Idempotency
+11. Timers & scheduling
+12. Sagas
 13. Summary
 
 ## Why do we need Restate?
@@ -211,6 +211,23 @@ You can use the CLI to inspect the K/V state of Virtual Objects:
 restate kv get <SERVICE> <KEY>
 ```
 
+## Idempotency
+[Docs](https://docs.restate.dev/invoke/http#invoke-a-handler-idempotently)
+
+Restate guarantees that calls between Restate services are done exactly-once.
+To also get this deduplication guarantee for incoming requests, you can use idempotency keys.
+
+An idempotency key is a unique identifier for a request that is sent by the client.
+The client can send the same request multiple times, but Restate will only process it once.
+
+You can add an idempotency key to a request by adding a header:
+
+```shell
+curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json' \
+    -H 'idempotency-key: ad5472esg4dsg525dssdfa5loi'  \
+    -d '"seat2C"'
+```
+
 ## Timers & scheduling
 [Docs](https://docs.restate.dev/develop/java/durable-timers)
 
@@ -222,7 +239,7 @@ Restate will track the timers, and make sure they are executed at the right time
 If the service crashes, Restate will resume the execution on another instance once the timer has expired. 
 The execution will be fast-forwarded to the point where the timer was set. 
 
-The delayed call functionality let's you schedule an execution for a later time.
+The delayed call functionality lets you schedule an execution for a later time.
 This can be used as a delayed task queue, for work parallelization or for cron jobs.
 
 In the example, we will wait for the payment callback with a timeout of 10 minutes. 
@@ -245,24 +262,6 @@ Throughout the code we will compose a list of compensation operations that need 
 In our catch block, we then run these compensations in reversed order. 
 
 Have a look at [p5/CheckoutService](src/main/java/my/example/p5/CheckoutService.java).
-
-## Idempotency
-[Docs](https://docs.restate.dev/invoke/http#invoke-a-handler-idempotently)
-
-Restate guarantees that calls between Restate services are done exactly-once. 
-To also get this deduplication guarantee for incoming requests, you can use idempotency keys.
-
-An idempotency key is a unique identifier for a request that is sent by the client.
-The client can send the same request multiple times, but Restate will only process it once.
-
-You can add an idempotency key to a request by adding a header:
-
-```shell
-curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json' \
-    -H 'idempotency-key: ad5472esg4dsg525dssdfa5loi'  \
-    -d '"seat2C"'
-```
-
 
 # Summary
 
