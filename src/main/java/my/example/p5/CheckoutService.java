@@ -35,14 +35,16 @@ public class CheckoutService {
       ctx.run("payment", () -> payAsync(paymentId, 40, awakeable.id()));
       boolean paid = awakeable.await(Duration.ofMinutes(10));
 
-      if(paid) {
-        compensations.add(() -> TicketServiceClient.fromContext(ctx, ticket).unreserve().await());
-        TicketServiceClient.fromContext(ctx, ticket).send().markAsSold();
+      if(!paid) {
+        TicketServiceClient.fromContext(ctx, ticket).send().unreserve();
       }
 
       return paid;
     } catch (TimeoutException | TerminalException e) {
-      compensations.reversed().forEach(Runnable::run);
+      final Iterator<Runnable> compensationsIterator = compensations.descendingIterator();
+      while (compensationsIterator.hasNext()) {
+        compensationsIterator.next().run();
+      }
       throw new TerminalException(e.getMessage());
     }
   }

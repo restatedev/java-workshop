@@ -4,7 +4,6 @@ import dev.restate.sdk.Context;
 import dev.restate.sdk.JsonSerdes;
 import dev.restate.sdk.annotation.Handler;
 import dev.restate.sdk.annotation.Service;
-import dev.restate.sdk.http.vertx.RestateHttpEndpointBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,8 +27,8 @@ public class CheckoutService {
     ctx.run("payment", () -> payAsync(paymentId, 40, awakeable.id()));
     boolean paid = awakeable.await();
 
-    if(paid) {
-        TicketServiceClient.fromContext(ctx, ticket).send().markAsSold();
+    if(!paid) {
+        TicketServiceClient.fromContext(ctx, ticket).send().unreserve();
     }
     return paid;
   }

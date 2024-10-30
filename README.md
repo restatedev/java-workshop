@@ -70,7 +70,7 @@ Let's do the payment by:
 ```java
   private boolean pay(String paymentId, int amount){
     // call payment provider
-    logger.info("Doing the payment for id " + paymentId + " and amount " + amount);
+    System.out.println("Doing the payment for id " + paymentId + " and amount " + amount);
     return true;
   }
 ```
@@ -83,7 +83,20 @@ Have a look at the [p1/checkoutService](src/main/java/my/example/p1/CheckoutServ
 Restate retries failed invocations automatically.
 On each retry, Restate replays the execution log to restore the state of the service.
 
-Run the [p1/checkoutService](src/main/java/my/example/p1/CheckoutService.java) and see how the retries take place.
+Let the checkout handler fail after doing the payment:
+```java
+throw new RuntimeException("Something went wrong");
+```
+
+Run the [p1/checkoutService](src/main/java/my/example/p1/CheckoutService.java).
+
+Send a request:
+
+```shell
+curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json' -d '"Rolling_Stones_31122024"'
+```
+
+and see how the retries take place.
 
 ## Observability and debugging with Restate CLI
 [Docs](https://docs.restate.dev/operate/introspection)
@@ -128,7 +141,7 @@ Let's turn the synchronous payment into an asynchronous payment and create an aw
 ```shell
   private void payAsync(String paymentId, int amount, String durableFutureId){
     // call payment provider
-    logger.info("Doing the payment for id " + paymentId +
+    System.out.println("Doing the payment for id " + paymentId +
             ", amount " + amount +
             " and durableFutureId " + durableFutureId);
   }
@@ -136,12 +149,16 @@ Let's turn the synchronous payment into an asynchronous payment and create an aw
 
 Have a look at the code in [p2/CheckoutService](src/main/java/my/example/p2/CheckoutService.java).
 
-Re-run the service, send a new checkout request, and resolve the awakeable with:
+Re-run the service, send a new checkout request:
 
 ```shell
-curl localhost:8080/restate/awakeables/prom_1PePOqp/resolve
-    -H 'content-type: application/json'
-    -d 'true'
+curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json' -d '"Rolling_Stones_31122024"'
+```
+
+and resolve the awakeable with:
+
+```shell
+curl localhost:8080/restate/awakeables/prom_1PePOqp/resolve -H 'content-type: application/json' -d 'true'
 ```
 
 ## Service communication
@@ -157,6 +174,12 @@ These clients can be used for request-response calls (RPC), one-way calls (messa
 Restate makes sure that the request is delivered to the target service, and makes sure the execution runs till completion via Durable Execution.
 
 Let's implement a `TicketService` that provides a method to reserve a ticket.
+Create an `AppMain` class with a main method which creates a Restate HTTP endpoint with the `TicketService` and the `CheckoutService` binded to it. 
+When you run this you need to re-register the service:
+```shell
+restate deployments register http://localhost:9080 --force
+```
+
 We will call this service from the `CheckoutService` to reserve the ticket before handling the payment.
 
 Have a look at [p3/CheckoutService](src/main/java/my/example/p3/CheckoutService.java) 

@@ -34,13 +34,4 @@ public class TicketService {
         }
         ctx.set(STATUS, "Available");
     }
-
-    @Handler
-    public void markAsSold(ObjectContext ctx) {
-        String status = ctx.get(STATUS).orElse("Available");
-        if(!status.equals("Reserved")){
-            return;
-        }
-        ctx.set(STATUS, "Sold");
-    }
 }

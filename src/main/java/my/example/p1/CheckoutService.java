@@ -23,7 +23,7 @@ public class CheckoutService {
 
     logger.info("Generated UUID: " + paymentId);
 
-    throw new RuntimeException("This is an example exception");
+    throw new RuntimeException("Something went wrong");
   }
 
   private boolean pay(String paymentId, int amount){
