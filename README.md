@@ -10,7 +10,8 @@ Pre-requisites:
 In this example, we will implement an e-commerce checkout process that let's you buy concert tickets.
 The application will make sure every ticket only gets sold once.
 
-![Overview](diagram.png)
+
+<img src="diagram.png" alt="overview" width="500"/>
 
 Content:
 1. Why do we need Restate?
@@ -240,7 +241,7 @@ curl localhost:8080/CheckoutService/checkout -H 'content-type: application/json'
 ```
 
 
-# Summary what did we do and Q&A
+# Summary
 
 | What we implemented | What we didn't implement, as Restate handles it for us |
 |-------|-------|
