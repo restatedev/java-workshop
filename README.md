@@ -7,6 +7,26 @@ Pre-requisites:
 - Java 21
 - [Install Restate Server and CLI](https://docs.restate.dev/develop/local_dev#running-restate-server--cli-locally)
 
+In this example, we will implement an e-commerce checkout process that let's you buy concert tickets.
+The application will make sure every ticket only gets sold once.
+
+![Overview](diagram.png)
+
+Content:
+1. Why do we need Restate?
+2. How does Restate work?
+3. Running your first application
+4. Persisting results
+5. Resiliency
+6. Observability and debugging with Restate CLI
+7. Awakeables
+8. Service communication
+9. Virtual Objects & State
+10. Timers & scheduling
+11. Sagas
+12. Idempotency
+13. Summary
+
 ## Why do we need Restate?
 
 ## How does Restate work?
@@ -22,8 +42,8 @@ Each handler is a service method annotated with `@Handler` and takes a `RestateC
 Restate sits in front of your services like a reverse proxy or message broker.
 Restate receives incoming requests and routes them to the appropriate handlers.
 
-In this example, we will implement an e-commerce checkout process. 
-We have a `CheckoutService` with a `checkout` method that reserves the ticket for the user and handles the payment.
+In our example, we have a `CheckoutService` with a `checkout` method that reserves the ticket for the user and handles the payment.
+This will be the first service we will develop:
 
 1. Rename the `Greeter` to `CheckoutService`
 2. Rename the `greet` method to `checkout` and let it take a `String ticket` as an argument.
@@ -41,6 +61,18 @@ You can store the result of a (non-deterministic) operation in the Restate execu
 Restate replays the result instead of re-executing the operation on retries.
 
 You can use `ctx.run` to execute an operation and store the result in the execution log.
+
+Let's do the payment by:
+1. Using `ctx.run` to generate a unique payment identifier that is stable on retries.
+2. Do the payment and use the payment identifier for deduplication. 
+
+```java
+  private boolean pay(String paymentId, int amount){
+    // call payment provider
+    logger.info("Doing the payment for id " + paymentId + " and amount " + amount);
+    return true;
+  }
+```
 
 Have a look at the [p1/checkoutService](src/main/java/my/example/p1/CheckoutService.java).
 
@@ -91,6 +123,15 @@ When the process crashes while waiting for an awakeable, Restate will resume the
 You can resolve an awakeable via its ID, either via HTTP or with SDK from within another service.
 
 Let's turn the synchronous payment into an asynchronous payment and create an awakeable to wait for the async response. 
+
+```shell
+  private void payAsync(String paymentId, int amount, String durableFutureId){
+    // call payment provider
+    logger.info("Doing the payment for id " + paymentId +
+            ", amount " + amount +
+            " and durableFutureId " + durableFutureId);
+  }
+```
 
 Have a look at the code in [p2/CheckoutService](src/main/java/my/example/p2/CheckoutService.java).
 
